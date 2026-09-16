@@ -1,0 +1,86 @@
+<style class="bodyimg"></style>
+<div class="home-content">
+    <aside class="sidebar">
+        <div class="sidebar-toggle">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="sidebar-top">
+            <div><img src="assets/images/logo.png" alt=""></div>
+
+            <div class="player-role"></div>
+        </div>
+        <div class="sidebar-middle">
+            <div class="play-element">
+                <button class="play-btn sidebar-btn" id="play-btn">
+                    <i class="fas fa-play"></i>
+                    <span class="btn-label">Играть</span>
+                </button>
+                <div class="download-content">
+                    <div class="text-download" id="text-download"></div>
+                    <progress value="0" max="0" class="progress-bar"></progress>
+                </div>
+
+            <button class="sidebar-btn nav-btn" id="news-btn">
+                <i class="fas fa-newspaper"></i>
+                <span class="btn-label">Новости</span>
+            </button>
+
+            <button class="sidebar-btn nav-btn" id="forum-btn">
+                <i class="fas fa-comments"></i>
+                <span class="btn-label">Форум</span>
+            </button>
+
+            <button class="sidebar-btn nav-btn" id="telegram-btn">
+                <i class="fab fa-telegram"></i>
+                <span class="btn-label">Телеграм</span>
+            </button>
+
+            <button class="sidebar-btn nav-btn" id="shop-btn">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="btn-label">Магазин</span>
+            </button>
+
+            <button class="sidebar-btn nav-btn" id="wiki-btn">
+                <i class="fas fa-book"></i>
+                <span class="btn-label">Вики</span>
+            </button>
+
+            <button class="settings-btn sidebar-btn" id="settings-btn">
+                <i class="fas fa-cog"></i>
+                <span class="btn-label">Настройки</span>
+            </button>
+            </div>
+
+        </div>
+        <div class="sidebar-bottom">
+            <div class="player-avatar-wrapper">
+                <div class="player-head"></div>
+                <div class="player-info">
+                    <div class="player-name"></div>
+                    <div class="player-role-text"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <section class="servers-section">
+            <div class="server-info"><img src="assets/images/Luminel.io.png" alt="">
+            <div><span class="info">Cейчас играют:</span>
+                <span class="online-info"><i class="fas fa-user"></i><a class="online-numbers">0</a></span>
+            </div>
+            </div>
+            <div class="servers-list" id="servers-list">
+                <!-- Серверы загружаются через JS -->
+            </div>
+        </section>
+
+        <aside class="info-section">
+            <section class="news-section">
+                <div class="news-list"></div>
+            </section>
+        </aside>
+
+        <div class="advert-banner" id="advert-banner" style="display:none;"></div>
+    </main>
+</div>

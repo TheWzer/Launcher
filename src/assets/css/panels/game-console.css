@@ -1,0 +1,296 @@
+/* Game Console and Download Progress Styles */
+
+#game-console-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 12, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+#game-console-overlay.visible {
+    display: flex;
+}
+
+.console-container {
+    width: 90%;
+    max-width: 1000px;
+    height: 80%;
+    max-height: 700px;
+    background: linear-gradient(135deg, rgba(20, 20, 25, 0.98), rgba(15, 15, 20, 0.98));
+    border-radius: 12px;
+    border: 1px solid rgba(1, 197, 255, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(1, 197, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.console-header {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, rgba(1, 197, 255, 0.15), rgba(1, 197, 255, 0.05));
+    border-bottom: 1px solid rgba(1, 197, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.console-title {
+    font: 600 20px/1.3 'Poppins', sans-serif;
+    color: #f0f0f2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.console-title::before {
+    content: '▶';
+    color: #01C5FF;
+    font-size: 18px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.console-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f0f0f2;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.console-close-btn:hover {
+    background: rgba(199, 29, 7, 0.2);
+    border-color: #c71d07;
+    color: #ff6b6b;
+}
+
+/* Download Progress Section */
+.download-section {
+    padding: 24px;
+    display: none;
+}
+
+.download-section.active {
+    display: block;
+}
+
+.download-file-info {
+    margin-bottom: 20px;
+    font: 400 14px/1.6 'Poppins', sans-serif;
+    color: rgba(240, 240, 242, 0.8);
+}
+
+.download-file-name {
+    font-weight: 600;
+    color: #01C5FF;
+    margin-bottom: 8px;
+}
+
+.download-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: rgba(240, 240, 242, 0.6);
+}
+
+.download-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.download-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #01C5FF, #00d4aa);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    position: relative;
+    box-shadow: 0 0 20px rgba(1, 197, 255, 0.5);
+}
+
+.download-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.download-files-list {
+    margin-top: 24px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.download-files-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.download-files-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 3px;
+}
+
+.download-files-list::-webkit-scrollbar-thumb {
+    background: rgba(1, 197, 255, 0.3);
+    border-radius: 3px;
+}
+
+.download-files-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(1, 197, 255, 0.5);
+}
+
+.download-file-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font: 400 13px/1.4 'Poppins', sans-serif;
+    color: rgba(240, 240, 242, 0.7);
+}
+
+.download-file-item.completed {
+    border-color: rgba(0, 212, 170, 0.3);
+    background: rgba(0, 212, 170, 0.05);
+}
+
+.download-file-item.downloading {
+    border-color: rgba(1, 197, 255, 0.3);
+    background: rgba(1, 197, 255, 0.05);
+}
+
+.download-file-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.download-file-item.completed .download-file-icon {
+    background: rgba(0, 212, 170, 0.2);
+    color: #00d4aa;
+}
+
+.download-file-item.downloading .download-file-icon {
+    background: rgba(1, 197, 255, 0.2);
+    color: #01C5FF;
+}
+
+.download-file-item.pending .download-file-icon {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(240, 240, 242, 0.5);
+}
+
+/* Console Output Section */
+.console-output {
+    flex: 1;
+    padding: 20px 24px;
+    overflow-y: auto;
+    font: 400 13px/1.6 'JetBrains Mono', 'Consolas', monospace;
+    color: #e0e0e2;
+    background: rgba(0, 0, 0, 0.3);
+    display: none;
+}
+
+.console-output.active {
+    display: block;
+}
+
+.console-output::-webkit-scrollbar {
+    width: 8px;
+}
+
+.console-output::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.console-output::-webkit-scrollbar-thumb {
+    background: rgba(1, 197, 255, 0.3);
+    border-radius: 4px;
+}
+
+.console-output::-webkit-scrollbar-thumb:hover {
+    background: rgba(1, 197, 255, 0.5);
+}
+
+.console-line {
+    margin-bottom: 4px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.console-line.info {
+    color: #01C5FF;
+}
+
+.console-line.success {
+    color: #00d4aa;
+}
+
+.console-line.warn {
+    color: #ffa726;
+}
+
+.console-line.error {
+    color: #ff6b6b;
+}
+
+.console-line.debug {
+    color: #b388ff;
+}
+
+.console-timestamp {
+    color: rgba(240, 240, 242, 0.4);
+    margin-right: 8px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

@@ -1,0 +1,397 @@
+.login {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.login-background {
+    position: absolute;
+    top: 0;
+    left: 320px;
+    right: 0;
+    bottom: 0;
+    /* background-image: url('../../images/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat; */
+    /* z-index: 0; */
+}
+
+.login-content {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 320px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.logo {
+    width: 200px;
+}
+
+.login-corner-logo {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 120px;
+    height: auto;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.login-corner-logo:hover {
+    opacity: 1;
+}
+
+.login-card-main {
+    position: relative;
+    height: 100%;
+    width: 320px;
+    background: #161616;
+    -webkit-backdrop-filter: blur(24px);
+    padding: 45px 40px 15px 40px;
+    text-align: center;
+    animation: cardSlideIn 0.4s ease-out;
+    overflow: hidden;
+}
+
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.login-header {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.login-icon {
+    font-size: 56px;
+    background: linear-gradient(180deg,
+            var(--accent-color, #01C5FF) 0%,
+            var(--accent-color-dark, #00a066) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 4px 12px var(--accent-color-glow, rgba(0, 189, 122, 0.4)));
+    margin-bottom: 18px;
+}
+
+.login-title {
+    display: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    margin-top: 30px;
+    letter-spacing: -0.3px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.info-login,
+.info-login-2f,
+.info-login-email {
+    display: block;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent-color, #01C5FF);
+    min-height: 22px;
+    margin-bottom: 18px;
+    text-shadow: 0 0 20px var(--accent-color-glow, rgba(0, 189, 122, 0.3));
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.login-input-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.login-input-group label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 20px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 16px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 20px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    z-index: 1;
+}
+
+.toggle-password:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.login-input {
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    color: #ffffff;
+    background: #1B1B1B;
+    border: none;
+    border-radius: 14px;
+    padding: 16px 50px;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) inset;
+    width: 100%;
+}
+
+.login-input:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+
+
+.login-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.login-links {
+    display: flex;
+    width: 70%;
+    margin: auto;
+    justify-content: space-between;
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.password-reset,
+.new-user {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.password-reset:hover,
+.new-user:hover {
+    color: var(--accent-color, #01C5FF);
+}
+
+.primary-btn,
+.login-btn {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #8D8D8D;
+    background: #1E1E1E;
+    border: none;
+    border-radius: 14px;
+    padding: 16px 24px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 100%;
+}
+
+.primary-btn:hover,
+.login-btn:hover {
+    transform: translateY(-3px);
+}
+
+.primary-btn:active,
+.login-btn:active {
+    transform: translateY(-1px);
+}
+
+.primary-btn:disabled,
+.login-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.cancel {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 12px;
+    transition: all 0.2s ease;
+    margin-top: 5px;
+}
+
+.cancel:hover {
+    color: #ffffff;
+}
+
+.cancel:disabled {
+    color: rgba(255, 255, 255, 0.2);
+    cursor: not-allowed;
+}
+
+.a2f-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 420px;
+    background: rgba(10, 10, 12, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 45px 40px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 32px 64px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    text-align: center;
+}
+
+.a2f-card .login-input {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 12px;
+    margin: 25px 0;
+    padding: 18px 20px;
+}
+
+.login-btn-2f {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0a0a0a;
+    background: linear-gradient(180deg,
+            var(--accent-color, #01C5FF) 0%,
+            var(--accent-color-dark, #00a066) 100%);
+    border: none;
+    border-radius: 14px;
+    padding: 16px 24px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 6px 20px var(--accent-color-glow, rgba(0, 189, 122, 0.35));
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.login-btn-2f:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px var(--accent-color-glow, rgba(0, 189, 122, 0.45));
+}
+
+.email-verify-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 420px;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.08) 0%,
+            rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 45px 40px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 32px 64px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    text-align: center;
+}
+
+.login-card,
+.login-card-mojang {
+    display: none !important;
+}
+
+.login-mojang-input {
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 16px 20px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.login-mojang-input:focus {
+    border-color: var(--accent-color, #01C5FF);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.Mail,
+.Password,
+.a2f {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.login-card-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: transparent;
+    border-radius: 24px 24px 0 0;
+}
+
+.login-card-main::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: transparent;
+    pointer-events: none;
+    z-index: -1;
+}

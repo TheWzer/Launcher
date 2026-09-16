@@ -1,0 +1,66 @@
+<div class="login-background">
+    <img src="assets/images/background.png" style="
+    width: 100%;">
+    <img class="login-corner-logo" src="assets/images/center-logo.png" />
+</div>
+<div class="login-content">
+    <div class="login-card-main">
+        <div class="login-header">
+            <img class="logo" src="assets/images/icon-id.png" />
+            <p class="login-title" id="login-title"></p>
+        </div>
+
+        <small class="info-login" id="info-login"></small>
+
+        <div class="login-form">
+            <div class="login-input-group">
+                <label id="username-label"></label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" class="Mail login-input" placeholder="Введите имя пользователя" spellcheck="false" autocomplete="username">
+                </div>
+            </div>
+
+            <div class="login-input-group">
+                <label id="password-label"></label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" class="Password login-input" placeholder="Введите пароль" spellcheck="false" autocomplete="current-password">
+                    <i class="fas fa-eye toggle-password"></i>
+                </div>
+            </div>
+
+
+            <button class="login-btn primary-btn" id="login-btn"></button>
+            <a href="https://lumine.li/register"><button class="login-btn primary-btn" id="register-btn">Регистрация</button></a>
+            <button class="cancel cancel-login" id="cancel-login-btn" style="display: none;"></button>
+
+            <div class="login-links">
+                <a class="password-reset" id="password-reset-link" target="_blank"></a>
+                <a class="new-user" id="new-user-link" target="_blank"></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="a2f-card" style="display: none;">
+        <div class="login-header">
+            <i class="fas fa-shield-alt login-icon"></i>
+            <p class="login-title" id="a2f-label"></p>
+        </div>
+        <div class="info-login-2f" id="info-login-2f"></div>
+        <div class="login-input-group">
+            <input type="text" class="a2f login-input" spellcheck="false" placeholder="000000">
+        </div>
+        <button class="login-btn-2f primary-btn" id="a2f-login-btn"></button>
+        <button class="cancel cancel-2f" id="cancel-a2f-btn"></button>
+    </div>
+
+    <div class="email-verify-card" style="display: none;">
+        <div class="login-header">
+            <i class="fas fa-envelope login-icon"></i>
+            <p class="login-title" id="email-verify-label"></p>
+        </div>
+        <div class="info-login-email" id="info-login-email"></div>
+        <button class="cancel cancel-email" id="cancel-email-btn"></button>
+    </div>
+</div>

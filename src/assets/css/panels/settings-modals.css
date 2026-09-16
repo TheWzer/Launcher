@@ -1,0 +1,160 @@
+/* Модальные окна для смены email и пароля */
+
+.input-with-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-with-button .credential-input {
+    flex: 1;
+}
+
+.edit-field-btn {
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.edit-field-btn:hover {
+    background: var(--accent-color-subtle, rgba(0, 189, 122, 0.15));
+    border-color: var(--accent-color, #01C5FF);
+    color: var(--accent-color, #01C5FF);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: rgba(10, 10, 12, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+    font: 600 18px/1 'Poppins', sans-serif;
+    color: #ffffff;
+    margin: 0;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 18px;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-step {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-step.hidden {
+    display: none;
+}
+
+.modal-info {
+    font: 400 14px/1.5 'Poppins', sans-serif;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 10px 0;
+}
+
+.modal-btn {
+    width: 100%;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    font: 500 14px/1 'Poppins', sans-serif;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+}
+
+.modal-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.modal-btn-primary {
+    background: linear-gradient(180deg, var(--accent-color, #01C5FF) 0%, var(--accent-color-dark, #00a066) 100%);
+    border: none;
+    color: #0a0a0a;
+    font-weight: 600;
+}
+
+.modal-btn-primary:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 4px 15px var(--accent-color-glow, rgba(0, 189, 122, 0.4));
+}
+
+.modal-error {
+    padding: 12px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    font: 400 13px/1.4 'Poppins', sans-serif;
+    color: #ef4444;
+    margin-top: 10px;
+}
+
+.modal-error.hidden {
+    display: none;
+}

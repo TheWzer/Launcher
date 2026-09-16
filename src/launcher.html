@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="assets/css/launcher.css">
+        <script src="assets/libs/skinview3d.bundle.min.js"></script>
+    </head>
+    <body class="hide">
+        <div class="dragbar"></div>
+        <div class="frame">
+            <div id="minimize" class="button-frame icon-minimize"></div>
+            <div id="maximize" class="button-frame icon-maximize"></div>
+            <div id="close" class="button-frame icon-close"></div>
+        </div>
+
+        <div class="preload-content">
+            <div class="preload-progress">
+                <span class="dot"></span>
+                <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="preload-title" id="preload-title"></div>
+        </div>
+
+        <div id="game-console-overlay">
+            <div class="console-container">
+                <div class="console-header">
+                    <div class="console-title">Запуск игры</div>
+                    <button class="console-close-btn" id="console-close-btn">×</button>
+                </div>
+
+                <div class="download-section" id="download-section">
+                    <div class="download-file-info">
+                        <div class="download-file-name" id="current-file-name">Проверка файлов...</div>
+                        <div class="download-stats">
+                            <span id="download-progress-text">0%</span>
+                            <span id="download-speed">0 KB/s</span>
+                        </div>
+                    </div>
+                    <div class="download-progress-bar">
+                        <div class="download-progress-fill" id="download-progress-fill" style="width: 0%"></div>
+                    </div>
+
+                    <div class="download-files-list" id="download-files-list"></div>
+                </div>
+
+                <div class="console-output" id="console-output"></div>
+            </div>
+        </div>
+
+        <div class="panels"></div>
+        <script src="assets/js/launcher.js" type="module"></script>
+    </body>
+</html>

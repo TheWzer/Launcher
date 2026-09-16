@@ -1,0 +1,126 @@
+/* Система уведомлений */
+
+.notification-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.notification {
+    min-width: 300px;
+    max-width: 400px;
+    padding: 16px 20px;
+    background: rgba(10, 10, 12, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: all;
+    opacity: 0;
+    transform: translateX(100%);
+    animation: slideIn 0.3s ease forwards;
+}
+
+.notification.closing {
+    animation: slideOut 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.notification-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.notification-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.notification-title {
+    font: 600 14px/1.2 'Poppins', sans-serif;
+    color: #ffffff;
+}
+
+.notification-message {
+    font: 400 13px/1.4 'Poppins', sans-serif;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.notification-close {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.notification-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.notification.success {
+    border-left: 3px solid #22c55e;
+}
+
+.notification.success .notification-icon {
+    color: #22c55e;
+}
+
+.notification.error {
+    border-left: 3px solid #ef4444;
+}
+
+.notification.error .notification-icon {
+    color: #ef4444;
+}
+
+.notification.info {
+    border-left: 3px solid var(--accent-color, #01C5FF);
+}
+
+.notification.info .notification-icon {
+    color: var(--accent-color, #01C5FF);
+}
+
+.notification.warning {
+    border-left: 3px solid #f59e0b;
+}
+
+.notification.warning .notification-icon {
+    color: #f59e0b;
+}

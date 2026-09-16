@@ -1,0 +1,59 @@
+[
+  {
+    "id": "server1",
+    "name": "Главный сервер",
+    "description": "Основной игровой сервер",
+    "icon": "https://via.placeholder.com/64",
+    "settings_url": "http://127.0.0.1:8000",
+    "status": {
+      "ip": "play.example.com",
+      "port": 25565,
+      "nameServer": "Главный сервер"
+    },
+    "game_version": "1.20.1",
+    "loader": {
+      "type": "forge",
+      "build": "47.2.0",
+      "enable": true
+    },
+    "enabled": true
+  },
+  {
+    "id": "server2",
+    "name": "Тестовый сервер",
+    "description": "Сервер для тестирования модов",
+    "icon": "https://via.placeholder.com/64",
+    "settings_url": "http://127.0.0.1:8001",
+    "status": {
+      "ip": "test.example.com",
+      "port": 25566,
+      "nameServer": "Тестовый сервер"
+    },
+    "game_version": "1.20.1",
+    "loader": {
+      "type": "fabric",
+      "build": "0.15.0",
+      "enable": true
+    },
+    "enabled": true
+  },
+  {
+    "id": "server3",
+    "name": "PvP Арена",
+    "description": "PvP сервер с мини-играми",
+    "icon": "https://via.placeholder.com/64",
+    "settings_url": "http://127.0.0.1:8002",
+    "status": {
+      "ip": "pvp.example.com",
+      "port": 25567,
+      "nameServer": "PvP Арена"
+    },
+    "game_version": "1.19.4",
+    "loader": {
+      "type": "vanilla",
+      "build": "",
+      "enable": false
+    },
+    "enabled": true
+  }
+]

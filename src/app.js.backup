@@ -1,0 +1,108 @@
+/**
+ * @author Luuxis
+ * Licensed under CC BY-NC 4.0
+ * https://creativecommons.org/licenses/by-nc/4.0/
+ *
+ * Edited by CentralCorp Team
+ */
+const { app, ipcMain, nativeTheme } = require('electron');
+const { Microsoft } = require('minecraft-java-core-azbetter');
+
+const path = require('path');
+const fs = require('fs');
+
+let data
+let dev = process.env.NODE_ENV === 'dev';
+let UpdateWindow, MainWindow;
+
+if (!app.requestSingleInstanceLock()) app.quit();
+else app.whenReady().then(() => {
+    // Загружаем window модули ТОЛЬКО после инициализации Electron
+    UpdateWindow = require("./assets/js/windows/updateWindow.js");
+    MainWindow = require("./assets/js/windows/mainWindow.js");
+
+    if (dev) return MainWindow.createWindow()
+    UpdateWindow.createWindow()
+});
+
+ipcMain.on('update-window-close', () => UpdateWindow.destroyWindow())
+ipcMain.on('update-window-dev-tools', () => UpdateWindow.getWindow().webContents.openDevTools())
+ipcMain.on('main-window-open', () => MainWindow.createWindow())
+ipcMain.on('main-window-dev-tools', () => MainWindow.getWindow().webContents.openDevTools())
+ipcMain.on('main-window-close', () => MainWindow.destroyWindow())
+ipcMain.on('main-window-progress', (event, options) => MainWindow.getWindow().setProgressBar(options.DL / options.totDL))
+ipcMain.on('main-window-progress-reset', () => MainWindow.getWindow().setProgressBar(0))
+ipcMain.on('main-window-minimize', () => MainWindow.getWindow().minimize())
+
+ipcMain.on('main-window-maximize', () => {
+    if (MainWindow.getWindow().isMaximized()) {
+        MainWindow.getWindow().unmaximize();
+    } else {
+        MainWindow.getWindow().maximize();
+    }
+})
+
+ipcMain.on('main-window-hide', () => MainWindow.getWindow().hide())
+ipcMain.on('main-window-show', () => MainWindow.getWindow().show())
+
+ipcMain.handle('is-dark-theme', (_, theme) => {
+    if (theme === 'dark') return true
+    if (theme === 'light') return false
+    return nativeTheme.shouldUseDarkColors;
+})
+
+ipcMain.handle('Microsoft-window', async (event, client_id) => {
+    return await new Microsoft(client_id).getAuth();
+})
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+});
+
+// Условно загружаем autoUpdater только после инициализации app
+let autoUpdater = null;
+if (!dev) {
+    app.whenReady().then(() => {
+        autoUpdater = require('electron-updater').autoUpdater;
+        autoUpdater.autoDownload = false;
+
+        autoUpdater.on('update-available', () => {
+            const updateWindow = UpdateWindow.getWindow();
+            if (updateWindow) updateWindow.webContents.send('updateAvailable');
+        });
+
+        autoUpdater.on('update-not-available', () => {
+            const updateWindow = UpdateWindow.getWindow();
+            if (updateWindow) updateWindow.webContents.send('update-not-available');
+        });
+
+        autoUpdater.on('update-downloaded', () => {
+            autoUpdater.quitAndInstall();
+        });
+
+        autoUpdater.on('download-progress', (progress) => {
+            const updateWindow = UpdateWindow.getWindow();
+            if (updateWindow) updateWindow.webContents.send('download-progress', progress);
+        });
+
+        autoUpdater.on('error', (err) => {
+            const updateWindow = UpdateWindow.getWindow();
+            if (updateWindow) updateWindow.webContents.send('error', err);
+        });
+    });
+}
+
+ipcMain.handle('update-app', async () => {
+    if (!autoUpdater) return { error: true, message: 'Auto-updater not available in dev mode' };
+    return await new Promise(async (resolve, reject) => {
+        autoUpdater.checkForUpdates().then(res => {
+            resolve(res);
+        }).catch(error => {
+            reject({ error: true, message: error });
+        });
+    });
+});
+
+ipcMain.on('start-update', () => {
+    if (autoUpdater) autoUpdater.downloadUpdate();
+});

@@ -1,0 +1,300 @@
+@import "font.css";
+@import "panels/login.css";
+@import "panels/home.css";
+@import "panels/settings.css";
+@import "panels/game-console.css";
+
+* {
+    outline: none;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    background: #161616;
+    background-size: cover;
+    overflow: hidden;
+}
+
+img {
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+.dragbar {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 26px;
+    -webkit-app-region: drag;
+    z-index: 11;
+}
+
+.frame {
+    background: transparent;
+    position: fixed;
+    display: table;
+    top: 0px;
+    right: 0px;
+    z-index: 11;
+    -webkit-app-region: no-drag;
+}
+
+.hide {
+    display: block;
+}
+
+.button-frame {
+    position: relative;
+    display: table-cell;
+    width: 30px;
+    height: 26px;
+    transition: color .2s, background-color .2s;
+    color: black;
+    cursor: pointer;
+}
+
+.icon-close:hover {
+    background: #c71d07;
+}
+
+.icon-minimize:hover,
+.icon-restore-down:hover,
+.icon-maximize:hover {
+    background-color: #0000009d;
+}
+
+.icon-close:before,
+.icon-minimize:before,
+.icon-maximize:before,
+.icon-restore-down:before {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    color: #f8f9f9;
+}
+
+.preload-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.preload-content.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.preload-progress {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preload-progress::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,
+            transparent 0%,
+            var(--accent-color, #01C5FF) 25%,
+            var(--accent-color, #01C5FF) 30%,
+            transparent 60%);
+    animation: spinLoader 1.2s linear infinite;
+    mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 4px));
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 4px));
+}
+
+.preload-progress::after {
+    content: '';
+    position: absolute;
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+    border-radius: 50%;
+    background: rgba(10, 10, 12, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 0 30px var(--accent-color-glow, rgba(0, 189, 122, 0.3)),
+        inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--accent-color, #01C5FF);
+    border-radius: 50%;
+    z-index: 2;
+    animation: dotPulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 20px var(--accent-color-glow, rgba(0, 189, 122, 0.6));
+}
+
+.dots {
+    display: none;
+}
+
+.dots span {
+    display: none;
+}
+
+@keyframes spinLoader {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
+}
+
+.preload-title {
+    font: 600 22px/1.4 'Poppins', sans-serif;
+    color: var(--text-primary, #f0f0f2);
+    text-align: center;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    opacity: 0.9;
+    animation: titleFade 2s ease-in-out infinite;
+}
+
+@keyframes titleFade {
+
+    0%,
+    100% {
+        opacity: 0.9;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.panel {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.active {
+    opacity: 1;
+    z-index: 1;
+    pointer-events: all;
+}
+
+.rotation {
+    animation: rotation 5s infinite linear;
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+#account-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a0a0c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+#account-loading-overlay.visible {
+    opacity: 1;
+}
+
+.loading-spinner {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-spinner::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,
+            transparent 0%,
+            var(--accent-color, #01C5FF) 25%,
+            var(--accent-color, #01C5FF) 30%,
+            transparent 60%);
+    animation: spinLoader 1s linear infinite;
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px));
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px));
+}
+
+.loading-spinner::after {
+    content: '';
+    position: absolute;
+    width: calc(100% - 12px);
+    height: calc(100% - 12px);
+    border-radius: 50%;
+    background: rgba(10, 10, 12, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 20px var(--accent-color-glow, rgba(0, 189, 122, 0.3));
+}
+
+.loading-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--accent-color, #01C5FF);
+    border-radius: 50%;
+    z-index: 2;
+    animation: dotPulse 1.2s ease-in-out infinite;
+    box-shadow: 0 0 15px var(--accent-color-glow, rgba(0, 189, 122, 0.6));
+}
