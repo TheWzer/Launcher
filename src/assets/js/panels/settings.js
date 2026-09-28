@@ -14,7 +14,16 @@ const os = require('os');
 const fetch = require('node-fetch');
 const path = require('path');
 const fs = require('fs');
-const pkg = require('../package.json');
+const pkg = window.pkgInfo || {
+    preductname: 'Lumine.li',
+    version: '4.0.17',
+    settings: 'https://lumine.li',
+    env: 'azuriom',
+    repository: {
+        type: 'git',
+        url: 'git+https://github.com/TheWzer/Launcher.git'
+    }
+};
 const { ipcRenderer, shell } = require('electron');
 const settings_url = pkg.user ? `${pkg.settings}/${pkg.user}` : pkg.settings;
 
@@ -232,8 +241,34 @@ class Settings {
     }
 
     async headplayer() {
-        const uuid = (await this.database.get('1234', 'accounts-selected')).value;
-        const account = (await this.database.get(uuid.selected, 'accounts')).value;
+        // Проверяем временный аккаунт (чужой компьютер)
+        if (window.temporaryAccount) {
+            const account = window.temporaryAccount;
+            const pseudo = account.name;
+            const azauth = this.getAzAuthUrl();
+            const timestamp = new Date().getTime();
+            const skin_url = `${azauth}api/skin-api/avatars/${pseudo}/?t=${timestamp}`;
+            document.querySelector(".player-head").style.backgroundImage = `url(${skin_url})`;
+            return;
+        }
+
+        // Обычная загрузка из базы данных
+        const selectedRecord = await this.database.get('1234', 'accounts-selected');
+        if (!selectedRecord || !selectedRecord.value) {
+            console.warn('No account selected');
+            return;
+        }
+        const uuid = selectedRecord.value;
+        if (!uuid || !uuid.selected) {
+            console.warn('Invalid selected record');
+            return;
+        }
+        const accountRecord = await this.database.get(uuid.selected, 'accounts');
+        if (!accountRecord || !accountRecord.value) {
+            console.warn('Account not found');
+            return;
+        }
+        const account = accountRecord.value;
         const pseudo = account.name;
         const azauth = this.getAzAuthUrl();
         const timestamp = new Date().getTime();
@@ -242,7 +277,25 @@ class Settings {
     }
 
     async updateAccountImage() {
+        // Проверяем временный аккаунт (чужой компьютер)
+        if (window.temporaryAccount) {
+            const account = window.temporaryAccount;
+            const azauth = this.getAzAuthUrl();
+            const timestamp = new Date().getTime();
+
+            const accountDiv = document.getElementById(account.uuid);
+            if (accountDiv) {
+                const accountImage = accountDiv.querySelector('.account-image');
+                if (accountImage) {
+                    accountImage.src = `${azauth}api/skin-api/avatars/${account.name}/?t=${timestamp}`;
+                }
+            }
+            return;
+        }
+
+        // Обычная загрузка из базы данных
         const uuid = (await this.database.get('1234', 'accounts-selected')).value;
+        if (!uuid || !uuid.selected) return;
         const account = (await this.database.get(uuid.selected, 'accounts')).value;
         const azauth = this.getAzAuthUrl();
         const timestamp = new Date().getTime();
@@ -283,8 +336,30 @@ class Settings {
         }
 
         // Получаем данные аккаунта
-        const uuid = (await this.database.get('1234', 'accounts-selected')).value;
-        const account = (await this.database.get(uuid.selected, 'accounts')).value;
+        let account;
+        if (window.temporaryAccount) {
+            // Используем временный аккаунт (чужой компьютер)
+            account = window.temporaryAccount;
+        } else {
+            // Обычная загрузка из базы данных
+            const selectedRecord = await this.database.get('1234', 'accounts-selected');
+            if (!selectedRecord || !selectedRecord.value) {
+                console.warn('No account selected and no temporary account');
+                return;
+            }
+            const uuid = selectedRecord.value;
+            if (!uuid || !uuid.selected) {
+                console.warn('Invalid selected record');
+                return;
+            }
+            const accountRecord = await this.database.get(uuid.selected, 'accounts');
+            if (!accountRecord || !accountRecord.value) {
+                console.warn('Account not found');
+                return;
+            }
+            account = accountRecord.value;
+        }
+
         const pseudo = account.name;
         const azauth = this.getAzAuthUrl();
 
@@ -325,9 +400,35 @@ class Settings {
     }
 
     async initOthers() {
-        const uuid = (await this.database.get('1234', 'accounts-selected')).value;
-        const account = (await this.database.get(uuid.selected, 'accounts')).value;
+        // Проверяем временный аккаунт (чужой компьютер)
+        if (window.temporaryAccount) {
+            const account = window.temporaryAccount;
+            this.updateRole(account);
+            this.updateMoney(account);
+            this.updateWhitelist(account);
+            return;
+        }
 
+        // Обычная загрузка из базы данных
+        const selectedRecord = await this.database.get('1234', 'accounts-selected');
+        if (!selectedRecord || !selectedRecord.value) {
+            console.warn('No account selected');
+            return;
+        }
+
+        const uuid = selectedRecord.value;
+        if (!uuid || !uuid.selected) {
+            console.warn('Invalid selected record');
+            return;
+        }
+
+        const accountRecord = await this.database.get(uuid.selected, 'accounts');
+        if (!accountRecord || !accountRecord.value) {
+            console.warn('Account not found');
+            return;
+        }
+
+        const account = accountRecord.value;
         this.updateRole(account);
         this.updateMoney(account);
         this.updateWhitelist(account);
@@ -698,8 +799,30 @@ class Settings {
     async initPreviewSkin() {
         console.log('initPreviewSkin called');
         const azauth = this.getAzAuthUrl();
-        let uuid = (await this.database.get('1234', 'accounts-selected')).value;
-        let account = (await this.database.get(uuid.selected, 'accounts')).value;
+
+        let account;
+        if (window.temporaryAccount) {
+            // Используем временный аккаунт (чужой компьютер)
+            account = window.temporaryAccount;
+        } else {
+            // Обычная загрузка из базы данных
+            const selectedRecord = await this.database.get('1234', 'accounts-selected');
+            if (!selectedRecord || !selectedRecord.value) {
+                console.warn('No account selected');
+                return;
+            }
+            const uuid = selectedRecord.value;
+            if (!uuid || !uuid.selected) {
+                console.warn('Invalid selected record');
+                return;
+            }
+            const accountRecord = await this.database.get(uuid.selected, 'accounts');
+            if (!accountRecord || !accountRecord.value) {
+                console.warn('Account not found');
+                return;
+            }
+            account = accountRecord.value;
+        }
 
         let title = document.querySelector('.player-skin-title');
         if (title) {
@@ -1270,23 +1393,47 @@ class Settings {
             const azauth = this.getAzAuthUrl();
             console.log('[loadCredentials] AzAuth URL:', azauth);
 
-            const uuid = (await this.database.get('1234', 'accounts-selected')).value;
-            console.log('[loadCredentials] Selected UUID:', uuid);
+            let account;
+            if (window.temporaryAccount) {
+                // Используем временный аккаунт (чужой компьютер)
+                account = window.temporaryAccount;
+                console.log('[loadCredentials] Using temporary account');
+            } else {
+                // Обычная загрузка из базы данных
+                const selectedRecord = await this.database.get('1234', 'accounts-selected');
+                if (!selectedRecord || !selectedRecord.value) {
+                    console.warn('[loadCredentials] No account selected');
+                    return;
+                }
+                const uuid = selectedRecord.value;
+                console.log('[loadCredentials] Selected UUID:', uuid);
 
-            const account = (await this.database.get(uuid.selected, 'accounts')).value;
+                if (!uuid || !uuid.selected) {
+                    console.warn('[loadCredentials] Invalid selected record');
+                    return;
+                }
+
+                const accountRecord = await this.database.get(uuid.selected, 'accounts');
+                if (!accountRecord || !accountRecord.value) {
+                    console.warn('[loadCredentials] Account not found');
+                    return;
+                }
+                account = accountRecord.value;
+            }
+
             console.log('[loadCredentials] Full account object:', JSON.stringify(account, null, 2));
             console.log('[loadCredentials] Account UUID:', account.uuid);
             console.log('[loadCredentials] Account email:', account.email);
 
-            const url = `${azauth}api/apiextender/account-info`;
+            const url = `${azauth}api/centralcorp/account-info?uuid=${account.uuid}`;
             console.log('[loadCredentials] Full URL:', url);
-            console.log('[loadCredentials] Request body:', JSON.stringify({ uuid: account.uuid }));
 
             // Получаем информацию об аккаунте с сервера
             const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uuid: account.uuid })
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
 
             console.log('[loadCredentials] Response status:', response.status);
@@ -1298,14 +1445,38 @@ class Settings {
                 const emailDisplay = document.getElementById('email-display');
                 const currentEmailDisplay = document.getElementById('current-email-display');
 
-                if (emailDisplay && data.user.email) {
-                    emailDisplay.value = data.user.email;
-                    account.email = data.user.email; // Сохраняем email в локальной базе
-                    await this.database.update(account, 'accounts');
+                // Получаем email из API или используем локальный fallback
+                const email = data.email || account.email || '';
+
+                console.log('[loadCredentials] Email to display:', email);
+                console.log('[loadCredentials] emailDisplay element:', emailDisplay);
+                console.log('[loadCredentials] currentEmailDisplay element:', currentEmailDisplay);
+
+                if (emailDisplay) {
+                    // Временно убираем disabled для установки значения
+                    emailDisplay.disabled = false;
+                    emailDisplay.value = email;
+                    emailDisplay.disabled = true;
+                    console.log('[loadCredentials] Set emailDisplay.value to:', emailDisplay.value);
+
+                    // Сохраняем email только если это не временный аккаунт
+                    if (!window.temporaryAccount && email) {
+                        account.email = email;
+                        await this.database.update(account, 'accounts');
+                        console.log('[loadCredentials] Saved email to database');
+                    }
                 }
 
-                if (currentEmailDisplay && data.user.email) {
-                    currentEmailDisplay.value = data.user.email;
+                if (currentEmailDisplay) {
+                    // Временно убираем disabled для установки значения
+                    currentEmailDisplay.disabled = false;
+                    currentEmailDisplay.value = email;
+                    currentEmailDisplay.disabled = true;
+                    console.log('[loadCredentials] Set currentEmailDisplay.value to:', currentEmailDisplay.value);
+                }
+
+                if (!email) {
+                    console.warn('[loadCredentials] No email available from API or local storage');
                 }
             } else {
                 console.warn('[loadCredentials] API failed, using local email');
@@ -1315,13 +1486,22 @@ class Settings {
                 // Fallback: пытаемся использовать email из локальной базы
                 const emailDisplay = document.getElementById('email-display');
                 const currentEmailDisplay = document.getElementById('current-email-display');
+                const email = account.email || '';
 
-                if (emailDisplay && account.email) {
-                    emailDisplay.value = account.email;
+                if (emailDisplay) {
+                    emailDisplay.disabled = false;
+                    emailDisplay.value = email;
+                    emailDisplay.disabled = true;
                 }
 
-                if (currentEmailDisplay && account.email) {
-                    currentEmailDisplay.value = account.email;
+                if (currentEmailDisplay) {
+                    currentEmailDisplay.disabled = false;
+                    currentEmailDisplay.value = email;
+                    currentEmailDisplay.disabled = true;
+                }
+
+                if (!email) {
+                    console.warn('[loadCredentials] No local email available either');
                 }
             }
         } catch (error) {

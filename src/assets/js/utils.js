@@ -9,9 +9,20 @@ import config from './utils/config.js';
 import database from './utils/database.js';
 import logger from './utils/logger.js';
 import slider from './utils/slider.js';
-const pkg = require('../package.json');
 const fs = require('fs');
 const path = require('path');
+
+// Используем глобальную переменную pkg, которая внедряется через window
+const pkg = window.pkgInfo || {
+    preductname: 'Lumine.li',
+    version: '4.0.15',
+    settings: 'https://lumine.li',
+    env: 'azuriom',
+    repository: {
+        type: 'git',
+        url: 'git+https://github.com/TheWzer/Launcher.git'
+    }
+};
 
 let translations = {};
 const systemLanguage = navigator.language.split('-')[0] || 'en';
@@ -47,7 +58,8 @@ export {
     accountSelect,
     showLoadingOverlay,
     hideLoadingOverlay,
-    t
+    t,
+    pkg
 };
 
 function changePanel(id) {

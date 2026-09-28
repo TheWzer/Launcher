@@ -1,7 +1,7 @@
 {
     "name": "lumine-launcher",
     "preductname": "Lumine.li",
-    "version": "4.0.15",
+    "version": "4.0.24",
     "description": "Lumine.li modded server launcher",
     "main": "src/app.js",
     "author": "Riptiaz/Boulldogo/Vexato/Luuxis",
@@ -10,7 +10,7 @@
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "build": "node build.js --obf=true --build=platform",
-        "build:win": "npx electron-builder --win --x64",
+        "build:win": "npx electron-builder --win --x64 -c.npmRebuild=false",
         "build:linux": "npx electron-builder --linux",
         "build:mac": "npx electron-builder --mac",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --ignore AppData/ --ignore node_modules/ --legacy-watch --exec npm start",
@@ -26,6 +26,7 @@
         "https": "^1.0.0",
         "minecraft-java-core-azbetter": "^4.1.4",
         "node-fetch": "^2.6.7",
+        "systeminformation": "^5.33.14",
         "xml-js": "^1.6.11"
     },
     "devDependencies": {

@@ -94,13 +94,16 @@ if (!dev) {
 
 ipcMain.handle('update-app', async () => {
     if (!autoUpdater) return { error: true, message: 'Auto-updater not available in dev mode' };
-    return await new Promise(async (resolve, reject) => {
-        autoUpdater.checkForUpdates().then(res => {
-            resolve(res);
-        }).catch(error => {
-            reject({ error: true, message: error });
-        });
-    });
+    try {
+        const result = await autoUpdater.checkForUpdates();
+        return result;
+    } catch (error) {
+        // Возвращаем объект с текстовым сообщением ошибки
+        return {
+            error: true,
+            message: error.message || String(error) || 'Unknown error occurred'
+        };
+    }
 });
 
 ipcMain.on('start-update', () => {

@@ -8,7 +8,16 @@
 'use strict';
 const fs = require('fs');
 const { Microsoft, Mojang, AZauth } = require('minecraft-java-core-azbetter');
-const pkg = require('../package.json');
+const pkg = window.pkgInfo || {
+    preductname: 'Lumine.li',
+    version: '4.0.17',
+    settings: 'https://lumine.li',
+    env: 'azuriom',
+    repository: {
+        type: 'git',
+        url: 'git+https://github.com/TheWzer/Launcher.git'
+    }
+};
 const { ipcRenderer } = require('electron');
 const DiscordRPC = require('discord-rpc');
 
@@ -94,14 +103,22 @@ class Launcher {
 
     createPanels(...panels) {
         const panelsElem = document.querySelector(".panels");
+        this.panelInstances = {}; // Зберігаємо посилання на екземпляри панелей
+
         for (const panel of panels) {
             console.log(`Initializing ${panel.name} Panel...`);
             const div = document.createElement("div");
             div.classList.add("panel", panel.id);
             div.innerHTML = fs.readFileSync(`${__dirname}/panels/${panel.id}.html`, "utf8");
             panelsElem.appendChild(div);
-            new panel().init(this.config, this.news);
+
+            const instance = new panel();
+            instance.init(this.config, this.news);
+            this.panelInstances[panel.id] = instance; // Зберігаємо екземпляр
         }
+
+        // Експортуємо глобально для доступу з login.js
+        window.launcherPanels = this.panelInstances;
     }
 
     async getAccounts() {

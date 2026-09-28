@@ -7,7 +7,7 @@
  */
 'use strict';
 const { ipcRenderer, shell } = require('electron');
-import { config, t } from './utils.js';
+import { config, t, pkg } from './utils.js';
 const os = require('os');
 const nodeFetch = require('node-fetch');
 
@@ -44,8 +44,13 @@ class Splash {
     async checkUpdate() {
         this.setStatus(`Проверка обновлений...`);
 
-        ipcRenderer.invoke('update-app').then().catch(err => {
-            return this.shutdown(`Ошибка при проверке обновлений:<br>${err.message}`);
+        ipcRenderer.invoke('update-app').then(result => {
+            // Проверяем, есть ли ошибка в результате
+            if (result && result.error) {
+                return this.shutdown(`Ошибка при проверке обновлений:<br>${result.message}`);
+            }
+        }).catch(err => {
+            return this.shutdown(`Ошибка при проверке обновлений:<br>${err.message || err}`);
         });
 
         ipcRenderer.on('updateAvailable', () => {
@@ -58,7 +63,7 @@ class Splash {
         })
 
         ipcRenderer.on('error', (event, err) => {
-            if (err) return this.shutdown(`${err.message}`);
+            if (err) return this.shutdown(`${err.message || err}`);
         })
 
         ipcRenderer.on('download-progress', (event, progress) => {

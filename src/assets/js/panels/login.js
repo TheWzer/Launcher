@@ -8,7 +8,17 @@
 import { database, changePanel, showLoadingOverlay, hideLoadingOverlay, t } from '../utils.js';
 const { AZauth } = require('minecraft-java-core-azbetter');
 const { ipcRenderer, shell } = require('electron');
-const pkg = require('../package.json');
+const HwidManager = require('../utils/hwid.js');
+const pkg = window.pkgInfo || {
+    preductname: 'Lumine.li',
+    version: '4.0.17',
+    settings: 'https://lumine.li',
+    env: 'azuriom',
+    repository: {
+        type: 'git',
+        url: 'git+https://github.com/TheWzer/Launcher.git'
+    }
+};
 const settings_url = pkg.user ? `${pkg.settings}/${pkg.user}` : pkg.settings;
 
 'use strict';
@@ -38,22 +48,47 @@ class Login {
         document.getElementById('new-user-link').textContent = t('no_account');
     }
 
-    async refreshData() {
+    async refreshData(account) {
         const roleElement = document.querySelector('.player-role');
         const monnaieElement = document.querySelector('.player-monnaie');
         if (roleElement) roleElement.innerHTML = '';
         if (monnaieElement) monnaieElement.innerHTML = '';
-        await this.initOthers();
-        await this.initPreviewSkin();
+
+        // Если передан аккаунт, используем его напрямую, иначе читаем из базы
+        if (account) {
+            await this.initOthers(account);
+            await this.initPreviewSkin(account);
+        } else {
+            await this.initOthers();
+            await this.initPreviewSkin();
+        }
         hideLoadingOverlay();
     }
 
-    async initPreviewSkin() {
+    async initPreviewSkin(account) {
         console.log('initPreviewSkin called');
         const baseUrl = settings_url.endsWith('/') ? settings_url : `${settings_url}/`;
         const websiteUrl = pkg.env === 'azuriom' ? `${baseUrl}` : this.config.azauth;
-        const uuid = (await this.database.get('1234', 'accounts-selected')).value;
-        const account = (await this.database.get(uuid.selected, 'accounts')).value;
+
+        // Если аккаунт не передан, читаем из базы
+        if (!account) {
+            const selectedRecord = await this.database.get('1234', 'accounts-selected');
+            if (!selectedRecord || !selectedRecord.value) {
+                console.warn('No account selected');
+                return;
+            }
+            const uuid = selectedRecord.value;
+            if (!uuid || !uuid.selected) {
+                console.warn('Invalid selected record');
+                return;
+            }
+            const accountRecord = await this.database.get(uuid.selected, 'accounts');
+            if (!accountRecord || !accountRecord.value) {
+                console.warn('Account not found');
+                return;
+            }
+            account = accountRecord.value;
+        }
 
         const skinTitleElement = document.querySelector('.player-skin-title');
         const skinRendererElement = document.querySelector('.skin-renderer-settings');
@@ -69,9 +104,26 @@ class Login {
         }
     }
 
-    async initOthers() {
-        const uuid = (await this.database.get('1234', 'accounts-selected')).value;
-        const account = (await this.database.get(uuid.selected, 'accounts')).value;
+    async initOthers(account) {
+        // Если аккаунт не передан, читаем из базы
+        if (!account) {
+            const selectedRecord = await this.database.get('1234', 'accounts-selected');
+            if (!selectedRecord || !selectedRecord.value) {
+                console.warn('No account selected');
+                return;
+            }
+            const uuid = selectedRecord.value;
+            if (!uuid || !uuid.selected) {
+                console.warn('Invalid selected record');
+                return;
+            }
+            const accountRecord = await this.database.get(uuid.selected, 'accounts');
+            if (!accountRecord || !accountRecord.value) {
+                console.warn('Account not found');
+                return;
+            }
+            account = accountRecord.value;
+        }
 
         this.updateRole(account);
         this.updateMoney(account);
@@ -209,6 +261,15 @@ class Login {
         this.passwordreset = document.querySelector(".password-reset");
         this.passwordreset.innerHTML = t('forgot_password');
         this.passwordreset.addEventListener('click', () => shell.openExternal(passwordreseturl));
+
+        // Добавляем обработчик для кнопки регистрации
+        const registerBtn = document.querySelector("#register-btn");
+        if (registerBtn) {
+            registerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                shell.openExternal('https://lumine.li/user/register');
+            });
+        }
     }
 
     setupEventListeners(elements, azauth) {
@@ -279,6 +340,11 @@ class Login {
 
     async handleLogin(elements, azauth, a2fCode = null) {
         const azAuth = new AZauth(azauth);
+
+        // Сохраняем email из формы ДО любых манипуляций
+        const emailFromForm = elements.mailInput.value;
+        console.log('[handleLogin] Email from form (saved early):', emailFromForm);
+
         try {
             const account_connect = a2fCode
                 ? await azAuth.login(elements.mailInput.value, elements.passwordInput.value, a2fCode)
@@ -313,10 +379,44 @@ class Login {
                 return;
             }
 
-            console.log(account_connect);
+            console.log('[handleLogin] Full account_connect object:', account_connect);
+            console.log('[handleLogin] account_connect.email:', account_connect.email);
+            console.log('[handleLogin] account_connect.user_info:', account_connect.user_info);
+            console.log('[handleLogin] mailInput value:', elements.mailInput.value);
+            console.log('[handleLogin] emailFromForm (saved early):', emailFromForm);
 
-            const account = this.createAccountObject(account_connect);
-            await this.saveAccount(account);
+            const account = this.createAccountObject(account_connect, emailFromForm);
+            console.log('[handleLogin] Created account object:', account);
+            console.log('[handleLogin] Account email field:', account.email);
+
+            // Проверяем HWID перед входом
+            console.log('[handleLogin] Checking HWID...');
+            const hwidManager = new HwidManager(azauth);
+            const hwidValidation = await hwidManager.validate();
+
+            if (hwidValidation.banned) {
+                console.error('[handleLogin] HWID is banned');
+                elements.infoLogin.innerHTML = 'Ваше железо заблокировано. Обратитесь к администрации.';
+                elements.infoLogin2f.innerHTML = 'Ваше железо заблокировано. Обратитесь к администрации.';
+                this.enableLoginForm(elements);
+                return;
+            }
+
+            console.log('[handleLogin] HWID check passed:', hwidValidation.message);
+
+            // Проверяем чекбокс "чужой компьютер"
+            const foreignComputerCheckbox = document.querySelector('#foreign-computer');
+            const isForeignComputer = foreignComputerCheckbox && foreignComputerCheckbox.checked;
+
+            if (isForeignComputer) {
+                // Если отмечен "чужой компьютер", не сохраняем в базу данных
+                // Только обновляем UI и переходим на главную панель
+                await this.updateUIWithoutSaving(account);
+            } else {
+                // Обычное сохранение в базу данных
+                await this.saveAccount(account);
+            }
+
             this.resetLoginForm(elements);
             elements.loginBtn.style.display = "block";
             elements.infoLogin.innerHTML = "&nbsp;";
@@ -327,12 +427,13 @@ class Login {
         }
     }
 
-    createAccountObject(account_connect) {
+    createAccountObject(account_connect, emailFromForm = '') {
         return {
             access_token: account_connect.access_token,
             client_token: account_connect.uuid,
             uuid: account_connect.uuid,
             name: account_connect.name,
+            email: '', // Email будет загружен из API в saveAccount
             user_properties: account_connect.user_properties,
             meta: {
                 type: account_connect.meta.type,
@@ -347,24 +448,179 @@ class Login {
     }
 
     async saveAccount(account) {
+        console.log('[saveAccount] Starting save for account:', account.name, account.uuid);
         const existingAccount = await this.database.get(account.uuid, 'accounts');
+        console.log('[saveAccount] Existing account:', existingAccount);
         showLoadingOverlay();
 
+        // Получаем email из нашего API
+        try {
+            const azauth = this.getAzAuthUrl();
+            const baseUrl = azauth.endsWith('/') ? azauth : `${azauth}/`;
+            const url = `${baseUrl}api/centralcorp/account-info?uuid=${account.uuid}`;
+            console.log('[saveAccount] Fetching email from:', url);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const accountInfo = await response.json();
+                console.log('[saveAccount] Account info from API:', accountInfo);
+                if (accountInfo.email) {
+                    account.email = accountInfo.email;
+                    console.log('[saveAccount] Email updated from API:', account.email);
+                }
+            } else {
+                console.warn('[saveAccount] Failed to fetch email from API:', response.status);
+            }
+        } catch (error) {
+            console.error('[saveAccount] Error fetching email from API:', error);
+        }
+
         if (existingAccount && existingAccount.value) {
+            console.log('[saveAccount] Updating existing account');
             await this.database.update(account, 'accounts');
         } else {
+            console.log('[saveAccount] Adding new account');
             await this.database.add(account, 'accounts');
         }
 
-        await this.database.update({ uuid: "1234", selected: account.uuid }, 'accounts-selected');
+        console.log('[saveAccount] Account saved, now saving selected record');
+
+        // Проверяем существование записи accounts-selected
+        const selectedRecord = await this.database.get('1234', 'accounts-selected');
+        console.log('[saveAccount] Existing selected record:', selectedRecord);
+
+        if (selectedRecord && selectedRecord.value) {
+            console.log('[saveAccount] Updating selected record');
+            await this.database.update({ uuid: "1234", selected: account.uuid }, 'accounts-selected');
+        } else {
+            console.log('[saveAccount] Adding new selected record');
+            await this.database.add({ uuid: "1234", selected: account.uuid }, 'accounts-selected');
+        }
+
+        console.log('[saveAccount] Selected record saved, verifying...');
+
+        // Добавляем небольшую задержку, чтобы IndexedDB успел завершить транзакции
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Проверяем, что данные действительно сохранились
+        const verifyAccount = await this.database.get(account.uuid, 'accounts');
+        const verifySelected = await this.database.get('1234', 'accounts-selected');
+        console.log('[saveAccount] Verify account:', verifyAccount);
+        console.log('[saveAccount] Verify selected:', verifySelected);
 
         const azauth = this.getAzAuthUrl();
         const timestamp = new Date().getTime();
         const skin_url = `${azauth}api/skin-api/avatars/${account.name}/?t=${timestamp}`;
         document.querySelector(".player-head").style.backgroundImage = `url(${skin_url})`;
 
+        // Сохраняем аккаунт во временную переменную для передачи в home.js
+        // Это решает проблему race condition - данные передаются напрямую, как с аватаром
+        window.temporaryAccount = account;
+
         changePanel("home");
-        await this.refreshData();
+
+        // Примусово оновлюємо UI панелі home після переходу
+        console.log('[Login.saveAccount] Manually updating home panel UI');
+        if (window.launcherPanels && window.launcherPanels.home) {
+            await window.launcherPanels.home.updatePlayerInfo(account);
+        }
+
+        // Примусово оновлюємо 3D скін в settings панелі
+        console.log('[Login.saveAccount] Manually updating settings skin');
+        if (window.launcherPanels && window.launcherPanels.settings) {
+            // Викликаємо ініціалізацію 3D скіна з переданим аккаунтом
+            await window.launcherPanels.settings.init3DSkinViewer();
+        }
+
+        await this.refreshData(account);
+    }
+
+    async updateUIWithoutSaving(account) {
+        showLoadingOverlay();
+
+        // Обновляем только UI без сохранения в базу
+        const azauth = this.getAzAuthUrl();
+        const timestamp = new Date().getTime();
+        const skin_url = `${azauth}api/skin-api/avatars/${account.name}/?t=${timestamp}`;
+        document.querySelector(".player-head").style.backgroundImage = `url(${skin_url})`;
+
+        // Временно сохраняем данные аккаунта в сессии для текущего запуска
+        window.temporaryAccount = account;
+
+        changePanel("home");
+
+        // Примусово оновлюємо UI панелі home після переходу
+        console.log('[Login.updateUIWithoutSaving] Manually updating home panel UI');
+        if (window.launcherPanels && window.launcherPanels.home) {
+            await window.launcherPanels.home.updatePlayerInfo(account);
+        }
+
+        // Примусово оновлюємо 3D скін в settings панелі
+        console.log('[Login.updateUIWithoutSaving] Manually updating settings skin');
+        if (window.launcherPanels && window.launcherPanels.settings) {
+            await window.launcherPanels.settings.init3DSkinViewer();
+        }
+
+        await this.refreshDataTemporary(account);
+    }
+
+    async refreshDataTemporary(account) {
+        const roleElement = document.querySelector('.player-role');
+        const monnaieElement = document.querySelector('.player-monnaie');
+        if (roleElement) roleElement.innerHTML = '';
+        if (monnaieElement) monnaieElement.innerHTML = '';
+
+        await this.initOthersTemporary(account);
+        await this.initPreviewSkinTemporary(account);
+        hideLoadingOverlay();
+    }
+
+    async initOthersTemporary(account) {
+        this.updateRole(account);
+        this.updateMoney(account);
+        this.updateWhitelistTemporary(account);
+    }
+
+    updateWhitelistTemporary(account) {
+        const playBtn = document.querySelector(".play-btn");
+        if (this.config.whitelist_activate &&
+            (!this.config.whitelist.includes(account.name) &&
+                !this.config.whitelist_roles.includes(account.user_info.role.name))) {
+            playBtn.style.backgroundColor = "#696969";
+            playBtn.style.pointerEvents = "none";
+            playBtn.style.boxShadow = "none";
+            playBtn.textContent = t('unavailable');
+        } else {
+            playBtn.style.backgroundColor = "#01C5FF";
+            playBtn.style.pointerEvents = "auto";
+            playBtn.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.3)";
+            playBtn.textContent = t('play');
+        }
+    }
+
+    async initPreviewSkinTemporary(account) {
+        console.log('initPreviewSkinTemporary called');
+        const baseUrl = settings_url.endsWith('/') ? settings_url : `${settings_url}/`;
+        const websiteUrl = pkg.env === 'azuriom' ? `${baseUrl}` : this.config.azauth;
+
+        const skinTitleElement = document.querySelector('.player-skin-title');
+        const skinRendererElement = document.querySelector('.skin-renderer-settings');
+
+        if (skinTitleElement) {
+            skinTitleElement.innerHTML = `${t('skin_of')} ${account.name}`;
+        }
+
+        if (skinRendererElement) {
+            skinRendererElement.src = `${websiteUrl}skin3d/3d-api/skin-api/${account.name}`;
+        } else {
+            console.warn('Skin renderer element not found in DOM');
+        }
     }
 
     setupPasswordToggle() {

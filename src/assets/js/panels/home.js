@@ -14,7 +14,16 @@ const { ipcRenderer, shell } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const launch = new Launch();
-const pkg = require("../package.json");
+const pkg = window.pkgInfo || {
+    preductname: 'Lumine.li',
+    version: '4.0.17',
+    settings: 'https://lumine.li',
+    env: 'azuriom',
+    repository: {
+        type: 'git',
+        url: 'git+https://github.com/TheWzer/Launcher.git'
+    }
+};
 const settings_url = pkg.user ? `${pkg.settings}/${pkg.user}` : pkg.settings;
 
 const dataDirectory =
@@ -58,7 +67,22 @@ class Home {
     this.initAdvert();
     this.verifyModsBeforeLaunch();
     this.initSidebarToggle();
-    await this.updatePlayerInfo();
+
+    // Проверяем, есть ли временный аккаунт (только что авторизовались)
+    // Если есть - используем его напрямую, иначе читаем из базы
+    if (window.temporaryAccount) {
+      console.log('[Home.init] Using temporaryAccount:', window.temporaryAccount);
+      await this.updatePlayerInfo(window.temporaryAccount);
+      // НЕ видаляємо одразу - settings.js може ще не встигнути завантажитися
+      // Відкладаємо видалення на 500мс
+      setTimeout(() => {
+        console.log('[Home.init] Clearing temporaryAccount after delay');
+        delete window.temporaryAccount;
+      }, 500);
+    } else {
+      console.log('[Home.init] No temporaryAccount, loading from database');
+      await this.updatePlayerInfo();
+    }
   }
 
   setStaticTexts() {
@@ -270,6 +294,18 @@ class Home {
     console.log("Server changed:", server.name);
     console.log("New game version:", this.config.game_version);
     console.log("New loader:", this.config.loader);
+
+    // Загружаем информацию о защите файлов для этого сервера
+    if (window.FileProtection) {
+      const baseUrl = settings_url.endsWith('/') ? settings_url : `${settings_url}/`;
+      this.fileProtection = new window.FileProtection(baseUrl);
+      await this.fileProtection.load(server.id);
+
+      const stats = this.fileProtection.getStats();
+      console.log('[FileProtection] Protection loaded:', stats);
+    } else {
+      console.warn('[FileProtection] Module not loaded');
+    }
 
     // Сохраняем выбор в БД
     await this.database.update(
@@ -801,26 +837,37 @@ class Home {
   }
 
   updateRole(account) {
+    console.log('[Home.updateRole] Called with account:', account);
     const playerName = document.querySelector(".player-name");
     const playerRoleText = document.querySelector(".player-role-text");
 
+    console.log('[Home.updateRole] playerName element:', playerName);
+    console.log('[Home.updateRole] playerRoleText element:', playerRoleText);
+
     // Оновлюємо нікнейм
     if (playerName) {
+      console.log('[Home.updateRole] Setting player name to:', account.name);
       playerName.textContent = account.name;
+    } else {
+      console.error('[Home.updateRole] playerName element not found!');
     }
 
     // Оновлюємо роль
     if (account.user_info && account.user_info.role) {
       const roleName = account.user_info.role.name;
+      console.log('[Home.updateRole] Setting role to:', roleName);
 
       if (playerRoleText) {
         playerRoleText.textContent = roleName;
         playerRoleText.style.display = "";
+      } else {
+        console.error('[Home.updateRole] playerRoleText element not found!');
       }
     } else {
       if (playerRoleText) {
         playerRoleText.style.display = "none";
       }
+      console.log('[Home.updateRole] No role info in account');
     }
   }
 
@@ -843,15 +890,22 @@ class Home {
     }
   }
 
-  async updatePlayerInfo() {
+  async updatePlayerInfo(account) {
     try {
+      // Если аккаунт передан напрямую, используем его
+      if (account) {
+        this.updateRole(account);
+        return;
+      }
+
+      // Иначе читаем из базы данных
       const uuid = await this.database.get('1234', 'accounts-selected');
       if (!uuid?.value?.selected) return;
 
-      const account = await this.database.get(uuid.value.selected, 'accounts');
-      if (!account?.value) return;
+      const accountRecord = await this.database.get(uuid.value.selected, 'accounts');
+      if (!accountRecord?.value) return;
 
-      this.updateRole(account.value);
+      this.updateRole(accountRecord.value);
     } catch (error) {
       console.error('Error updating player info:', error);
     }
